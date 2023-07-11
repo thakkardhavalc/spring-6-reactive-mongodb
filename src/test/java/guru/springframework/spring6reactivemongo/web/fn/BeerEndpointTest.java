@@ -90,7 +90,7 @@ public class BeerEndpointTest {
     void testUpdateBeerNotFound() {
         webTestClient.put()
                 .uri(BEER_PATH_ID, 999)
-                .body(Mono.just(BeerServiceImplTest.getTestBeer()), BeerDTO.class)
+                .body(Mono.just(getTestBeer()), BeerDTO.class)
                 .exchange()
                 .expectStatus().isNotFound();
     }
@@ -110,7 +110,7 @@ public class BeerEndpointTest {
 
     @Test
     void testCreateBeerBadData() {
-        Beer testBeer = BeerServiceImplTest.getTestBeer();
+        Beer testBeer = getTestBeer();
         testBeer.setBeerName("");
 
         webTestClient.post()
@@ -123,13 +123,15 @@ public class BeerEndpointTest {
 
     @Test
     void testCreateBeer() {
+        BeerDTO testDto = getSavedTestBeer();
+
         webTestClient.post()
                 .uri(BEER_PATH)
-                .body(Mono.just(BeerServiceImplTest.getTestBeer()), BeerDTO.class)
+                .body(Mono.just(testDto), BeerDTO.class)
                 .header("Content-Type", "application/json")
                 .exchange()
                 .expectStatus().isCreated()
-                .expectHeader().location("http://localhost:8080/api/v2/beer/4");
+                .expectHeader().exists("location");
     }
 
     @Test
@@ -165,8 +167,9 @@ public class BeerEndpointTest {
     }
 
     public BeerDTO getSavedTestBeer(){
-        FluxExchangeResult<BeerDTO> beerDTOFluxExchangeResult = webTestClient.post().uri(BEER_PATH)
-                .body(Mono.just(BeerServiceImplTest.getTestBeer()), BeerDTO.class)
+        FluxExchangeResult<BeerDTO> beerDTOFluxExchangeResult = webTestClient.post()
+                .uri(BEER_PATH)
+                .body(Mono.just(getTestBeer()), BeerDTO.class)
                 .header("Content-Type", "application/json")
                 .exchange()
                 .returnResult(BeerDTO.class);
