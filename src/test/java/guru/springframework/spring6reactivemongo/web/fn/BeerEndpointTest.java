@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.reactive.server.FluxExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -18,8 +19,10 @@ import java.util.List;
 import static guru.springframework.spring6reactivemongo.services.BeerServiceImplTest.getTestBeer;
 import static guru.springframework.spring6reactivemongo.web.fn.BeerRouterConfig.BEER_PATH;
 import static guru.springframework.spring6reactivemongo.web.fn.BeerRouterConfig.BEER_PATH_ID;
+import static net.bytebuddy.implementation.FixedValue.value;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasSize;
+
 
 /**
  * Created By dhaval on 2023-07-11
@@ -157,13 +160,37 @@ public class BeerEndpointTest {
 
     @Test
     @Order(2)
+    void testListBeerByStyle() {
+        final String BEER_STYLE = "TEST";
+        BeerDTO testDto = getSavedTestBeer();
+        testDto.setBeerStyle(BEER_STYLE);
+
+        // create test data
+        webTestClient.post()
+                .uri(BEER_PATH)
+                .body(Mono.just(testDto), BeerDTO.class)
+                .header("Content-type", "application/json")
+                .exchange();
+
+        webTestClient.get()
+                .uri(UriComponentsBuilder
+                        .fromPath(BEER_PATH)
+                        .queryParam("beerStyle", BEER_STYLE).build().toUri())
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals("Content-type", "application/json")
+                .expectBody().jsonPath("$.size()").value(equalTo(1));
+    }
+
+    @Test
+    @Order(2)
     void testListBeers() {
         webTestClient.get()
                 .uri(BEER_PATH)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().valueEquals("Content-type", "application/json")
-                .expectBody().jsonPath("$.size()", hasSize(greaterThan(1)));
+                .expectBody().jsonPath("$.size()", value(greaterThan(1)));
     }
 
     public BeerDTO getSavedTestBeer(){

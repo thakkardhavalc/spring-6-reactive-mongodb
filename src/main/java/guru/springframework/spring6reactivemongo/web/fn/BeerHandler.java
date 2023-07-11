@@ -13,6 +13,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static guru.springframework.spring6reactivemongo.web.fn.BeerRouterConfig.BEER_PATH_ID;
@@ -79,7 +80,15 @@ public class BeerHandler {
     }
 
     public Mono<ServerResponse> listBeers(ServerRequest request) {
+        Flux<BeerDTO> dtoFlux;
+
+        if (request.queryParam("beerStyle").isPresent()) {
+            dtoFlux = beerService.findByBeerStyle(request.queryParam("beerStyle").get());
+        } else {
+            dtoFlux = beerService.listBeers();
+        }
+
         return ServerResponse.ok()
-                .body(beerService.listBeers(), BeerDTO.class);
+                .body(dtoFlux, BeerDTO.class);
     }
 }
