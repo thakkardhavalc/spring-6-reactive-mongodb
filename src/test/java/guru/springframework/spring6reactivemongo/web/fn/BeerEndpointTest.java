@@ -2,7 +2,6 @@ package guru.springframework.spring6reactivemongo.web.fn;
 
 import guru.springframework.spring6reactivemongo.domain.Beer;
 import guru.springframework.spring6reactivemongo.model.BeerDTO;
-import guru.springframework.spring6reactivemongo.services.BeerServiceImplTest;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
